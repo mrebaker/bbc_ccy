@@ -65,12 +65,13 @@ def search_tweets(date):
 def search_stories(search_date):
     params = {'key': CONFIG['google']['key'],
               'cx': CONFIG['google']['cx'],
-              'q': 'Pound falls',
+              'q': 'Pound+sterling',
               'before': search_date + dt.timedelta(days=2),
               'after': search_date + dt.timedelta(days=-1)
               }
     param_str = '&'.join([f'{k}={v}' for k, v in params.items()])
-    uri = 'https://www.googleapis.com/customsearch/v1?' + param_str
+    uri = 'https://www.googleapis.com/customsearch/v1/siterestrict?' + param_str
+    print(uri)
     r = requests.get(uri)
     if r.status_code != 200:
         raise requests.HTTPError(r.json()['message'])
