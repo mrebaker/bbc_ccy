@@ -7,6 +7,7 @@ in a currency rate e.g. GBP/USD
 
 # standard library imports
 import datetime as dt
+import json
 from pathlib import Path
 
 # third party imports
@@ -74,6 +75,7 @@ def search_stories(search_date):
     if r.status_code != 200:
         raise requests.HTTPError(r.json()['message'])
     hits = r.json()
+    json.dump(hits, open('data.json', 'w'))
     for hit in hits:
         print(hit)
 
