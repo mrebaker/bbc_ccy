@@ -39,10 +39,10 @@ def filter_data(df_in):
 
 
 def twitter_api():
-    auth = tweepy.OAuthHandler(consumer_key=CONFIG['twitter_login']['consumer_key'],
-                               consumer_secret=CONFIG['twitter_login']['consumer_secret'])
-    auth.set_access_token(key=CONFIG['twitter_login']['access_key'],
-                          secret=CONFIG['twitter_login']['access_secret'])
+    auth = tweepy.OAuthHandler(consumer_key=CONFIG['twitter']['consumer_key'],
+                               consumer_secret=CONFIG['twitter']['consumer_secret'])
+    auth.set_access_token(key=CONFIG['twitter']['access_key'],
+                          secret=CONFIG['twitter']['access_secret'])
     return tweepy.API(auth)
 
 
