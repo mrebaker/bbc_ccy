@@ -6,6 +6,7 @@ in a currency rate e.g. GBP/USD
 """
 
 # standard library imports
+import datetime as dt
 from pathlib import Path
 
 # third party imports
@@ -37,6 +38,16 @@ def search_tweets(date):
     api = start_api()
     tweets = api.search(q=' OR '.join(keywords))
     return [tweet for tweet in tweets]
+
+
+def search_stories(search_date):
+    uri = 'https://www.googleapis.com/customsearch/v1?'
+    params = {'key': CONFIG['google']['key'],
+              'cx': CONFIG['google']['cx'],
+              'q': 'Pound falls',
+              'before': search_date + dt.timedelta(days=2),
+              'after': search_date + dt.timedelta(days=-1)
+              }
 
 
 if __name__ == '__main__':
