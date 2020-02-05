@@ -39,6 +39,26 @@ def filter_data(df_in):
     return df_out
 
 
+def inter_day_change(date):
+    params = {'key': CONFIG['fixer.io']['key'],
+              'symbols': 'USD,GBP',
+              'date': date.strftime('%Y-%m-%d')}
+    uri = 'http://data.fixer.io/api/{date}?access_key={key}&symbols={symbols}&format=1'
+    r = requests.get(uri.format(**params))
+    if r.status_code != 200:
+        raise requests.HTTPError(r.json()['message'])
+    content = r.json()
+    rate_1 = content['rates']['USD'] / content['rates']['GBP']
+
+    params['date'] = (date + dt.timedelta(days=-1)).strftime("%Y-%m-%d")
+    r = requests.get(uri.format(**params))
+    if r.status_code != 200:
+        raise requests.HTTPError(r.json()['message'])
+    content = r.json()
+    rate_0 = content['rates']['USD'] / content['rates']['GBP']
+    return rate_1 - rate_0
+
+
 def twitter_api():
     auth = tweepy.OAuthHandler(consumer_key=CONFIG['twitter']['consumer_key'],
                                consumer_secret=CONFIG['twitter']['consumer_secret'])
@@ -82,7 +102,8 @@ def search_stories(search_date):
 
 
 if __name__ == '__main__':
-    search_stories(dt.date(2017, 1, 17))
+    # search_stories(dt.date(2017, 1, 17))
+    print(intraday_change(dt.date(2020, 2, 5)))
     # df = load_rate_data()
     # df = cleanse(df)
     # df = filter_data(df)
