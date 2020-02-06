@@ -19,6 +19,14 @@ import yaml
 CONFIG = yaml.safe_load(open('config.yml', 'r'))
 
 
+def analyse_rate_history():
+    df = load_rate_data()
+    df = cleanse(df)
+    df = filter_data(df)
+    df['tweets'] = df['Date'].apply(lambda x: len(search_tweets(x)))
+    print(df)
+
+
 def cleanse(df_in):
     # data cleansing
     df_out = df_in.rename(columns={'Change %': 'Change'})
@@ -67,11 +75,10 @@ def twitter_api():
     return tweepy.API(auth)
 
 
-def search_tweets(date):
+def search_tweets():
     """
     Searches for tweets on a given date - but the API only goes back 7 days so this needs
     to be changed to screen scraping
-    :param date:
     :return: a list of tweets
     """
     handle = 'BBCBusiness'
@@ -82,12 +89,11 @@ def search_tweets(date):
     return [tweet for tweet in tweets]
 
 
-def search_stories(search_date):
+def search_stories():
     params = {'key': CONFIG['google']['key'],
               'cx': CONFIG['google']['cx'],
               'q': 'Pound+sterling',
-              'before': search_date + dt.timedelta(days=2),
-              'after': search_date + dt.timedelta(days=-1)
+              'dateRestrict': f'd1'
               }
     param_str = '&'.join([f'{k}={v}' for k, v in params.items()])
     uri = 'https://www.googleapis.com/customsearch/v1/siterestrict?' + param_str
@@ -102,10 +108,5 @@ def search_stories(search_date):
 
 
 if __name__ == '__main__':
-    # search_stories(dt.date(2017, 1, 17))
-    print(intraday_change(dt.date(2020, 2, 5)))
-    # df = load_rate_data()
-    # df = cleanse(df)
-    # df = filter_data(df)
-    # df['tweets'] = df['Date'].apply(lambda x: len(search_tweets(x)))
-    # print(df)
+    if inter_day_change(dt.date.today() + dt.timedelta(days=-1)) > 0.01:
+        search_stories()
