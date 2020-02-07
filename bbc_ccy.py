@@ -54,14 +54,14 @@ def inter_day_change(date_1):
     rates = {}
     for date in [date_0, date_1]:
         params = {'key': CONFIG['fixer.io']['key'],
-                  'symbols': 'USD,GBP',
+                  'symbols': 'GBP',
                   'date': date.strftime('%Y-%m-%d')}
         uri = 'http://data.fixer.io/api/{date}?access_key={key}&symbols={symbols}&format=1'
         r = requests.get(uri.format(**params))
         if r.status_code != 200:
             raise requests.HTTPError(r.json()['message'])
         content = r.json()
-        rates[date] = content['rates']['USD'] / content['rates']['GBP']
+        rates[date] = 1 / content['rates']['GBP']
 
     change = rates[date_1] - rates[date_0]
     logging.info(f'{date_0} to {date_1} {rates[date_1]:0.5f}-{rates[date_0]:0.5f} = {change:0.5f}')
