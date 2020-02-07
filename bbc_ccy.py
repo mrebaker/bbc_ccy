@@ -93,7 +93,7 @@ def search_tweets():
 def search_stories():
     params = {'key': CONFIG['google']['key'],
               'cx': CONFIG['google']['cx'],
-              'q': 'Pound+sterling',
+              'q': 'Pound sterling euro',
               'dateRestrict': f'd1'
               }
     param_str = '&'.join([f'{k}={v}' for k, v in params.items()])
@@ -104,11 +104,13 @@ def search_stories():
         raise requests.HTTPError(r.json()['message'])
     hits = r.json()
     json.dump(hits, open('data.json', 'w'))
-    for hit in hits:
+    for hit in hits['items']:
         print(hit)
 
 
 if __name__ == '__main__':
-    logging.basicConfig(filename='bbc_ccy.log', level=logging.DEBUG)
-    if inter_day_change(dt.date.today() + dt.timedelta(days=-1)) > 0.01:
-        search_stories()
+    # logging.basicConfig(filename='bbc_ccy.log', level=logging.DEBUG)
+    # if inter_day_change(dt.date.today() + dt.timedelta(days=-1)) > 0.01:
+    #     search_stories()
+
+    search_stories()
