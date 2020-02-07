@@ -8,6 +8,7 @@ in a currency rate e.g. GBP/USD
 # standard library imports
 import datetime as dt
 import json
+import logging
 from pathlib import Path
 
 # third party imports
@@ -47,24 +48,24 @@ def filter_data(df_in):
     return df_out
 
 
-def inter_day_change(date):
-    params = {'key': CONFIG['fixer.io']['key'],
-              'symbols': 'USD,GBP',
-              'date': date.strftime('%Y-%m-%d')}
-    uri = 'http://data.fixer.io/api/{date}?access_key={key}&symbols={symbols}&format=1'
-    r = requests.get(uri.format(**params))
-    if r.status_code != 200:
-        raise requests.HTTPError(r.json()['message'])
-    content = r.json()
-    rate_1 = content['rates']['USD'] / content['rates']['GBP']
+def inter_day_change(date_1):
+    date_0 = date_1 + dt.timedelta(days=-1)
 
-    params['date'] = (date + dt.timedelta(days=-1)).strftime("%Y-%m-%d")
-    r = requests.get(uri.format(**params))
-    if r.status_code != 200:
-        raise requests.HTTPError(r.json()['message'])
-    content = r.json()
-    rate_0 = content['rates']['USD'] / content['rates']['GBP']
-    return rate_1 - rate_0
+    rates = {}
+    for date in [date_0, date_1]:
+        params = {'key': CONFIG['fixer.io']['key'],
+                  'symbols': 'USD,GBP',
+                  'date': date.strftime('%Y-%m-%d')}
+        uri = 'http://data.fixer.io/api/{date}?access_key={key}&symbols={symbols}&format=1'
+        r = requests.get(uri.format(**params))
+        if r.status_code != 200:
+            raise requests.HTTPError(r.json()['message'])
+        content = r.json()
+        rates[date] = content['rates']['USD'] / content['rates']['GBP']
+
+    change = rates[date_1] - rates[date_0]
+    logging.info(f'{date_0} to {date_1} {rates[date_1]:0.5f}-{rates[date_0]:0.5f} = {change:0.5f}')
+    return change
 
 
 def twitter_api():
@@ -108,5 +109,6 @@ def search_stories():
 
 
 if __name__ == '__main__':
+    logging.basicConfig(filename='bbc_ccy.log', level=logging.DEBUG)
     if inter_day_change(dt.date.today() + dt.timedelta(days=-1)) > 0.01:
         search_stories()
