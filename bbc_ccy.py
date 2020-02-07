@@ -93,8 +93,8 @@ def search_tweets():
 def search_stories():
     params = {'key': CONFIG['google']['key'],
               'cx': CONFIG['google']['cx'],
-              'q': 'Pound sterling euro',
-              'dateRestrict': f'd1'
+              'q': 'Pound%20sterling%20euro',
+              'dateRestrict': f'd2'
               }
     param_str = '&'.join([f'{k}={v}' for k, v in params.items()])
     uri = 'https://www.googleapis.com/customsearch/v1/siterestrict?' + param_str
@@ -104,8 +104,8 @@ def search_stories():
         raise requests.HTTPError(r.json()['message'])
     hits = r.json()
     json.dump(hits, open('data.json', 'w'))
-    for hit in hits['items']:
-        print(hit)
+
+    return hits.get('items', [])
 
 
 if __name__ == '__main__':
@@ -113,4 +113,4 @@ if __name__ == '__main__':
     # if inter_day_change(dt.date.today() + dt.timedelta(days=-1)) > 0.01:
     #     search_stories()
 
-    search_stories()
+    print(len(search_stories()))
