@@ -6,6 +6,7 @@ in a currency rate e.g. GBP/USD
 """
 
 # standard library imports
+import csv
 import datetime as dt
 import json
 import logging
@@ -91,10 +92,11 @@ def search_tweets():
 
 
 def search_stories():
+    search_words = ['pound', 'euro']
     params = {'key': CONFIG['google']['key'],
               'cx': CONFIG['google']['cx'],
-              'q': 'Pound%20sterling%20euro',
-              'dateRestrict': f'd2'
+              'q': ' '.join([f'"{word}"' for word in search_words]),
+              'dateRestrict': 'd2'
               }
     param_str = '&'.join([f'{k}={v}' for k, v in params.items()])
     uri = 'https://www.googleapis.com/customsearch/v1/siterestrict?' + param_str
@@ -104,13 +106,21 @@ def search_stories():
         raise requests.HTTPError(r.json()['message'])
     hits = r.json()
     json.dump(hits, open('data.json', 'w'))
-
-    return hits.get('items', [])
+    stories = hits.get('items', [])
+    for story in stories:
+        if 'Market data: FTSE 100, Pound/\nDollar, Pound/Euro, US markets, Oil prices.' in story['snippet']:
+            score = sum(story['title'].lower().count(word) for word in search_words)
+            if score == 0:
+                stories.remove(story)
+    return stories
 
 
 if __name__ == '__main__':
-    # logging.basicConfig(filename='bbc_ccy.log', level=logging.DEBUG)
-    # if inter_day_change(dt.date.today() + dt.timedelta(days=-1)) > 0.01:
-    #     search_stories()
+    logging.basicConfig(filename='bbc_ccy.log', level=logging.DEBUG)
 
-    print(len(search_stories()))
+    results = {'date': dt.date.today(),
+               'rate_change': inter_day_change(dt.date.today() + dt.timedelta(days=-1)),
+               'stories_count': len(search_stories())}
+
+    writer = csv.DictWriter(open('bbc_ccy.csv', 'w+'), fieldnames=results.keys())
+    writer.writerow(results)
