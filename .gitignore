@@ -1,0 +1,10 @@
+# Project-specific
+data.json
+*.csv
+*.log
+
+# Secrets
+.env
+
+# Python
+*.pyc

@@ -1,0 +1,20 @@
+[project]
+name = "bbc-ccy"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [{ name = "Matt Baker", email = "matt.baker988@gmail.com" }]
+requires-python = ">=3.11"
+dependencies = [
+    "pandas>=2.2.3",
+    "python-dotenv>=1.0.1",
+    "requests>=2.32.3",
+    "tweepy>=4.15.0",
+]
+
+[project.scripts]
+bbc-ccy = "bbc_ccy:main.main"
+
+[build-system]
+requires      = ["hatchling"]
+build-backend = "hatchling.build"
